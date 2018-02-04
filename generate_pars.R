@@ -13,11 +13,11 @@ require(Matrix)
 #' @export
 modgen <- function (n, p, ...) {
   
-  pars <- list(...)
+  stopifnot(n>1, p>0)
   
-  a <- modgen.a(n, p, pars)
+  a <- modgen.a(n, p, ...)
   
-  b <- modgen.b(n, pars)
+  b <- modgen.b(n, ...)
   
   sigma <- b%*%t(b)
   
@@ -50,9 +50,14 @@ modgen.a <- function (n, p, ...) {
   
   roots <- gen_random_numbers (n*p - nb.c.roots, nb.c.roots/2, pars)
   
-  complex.block <- lapply(roots$complex, function(x)matrix(c(Re(x),-Im(x),Im(x),Re(x)),2,2))
+  if(nb.c.roots>0){
+    complex.block <- lapply(roots$complex, function(x)matrix(c(Re(x),-Im(x),Im(x),Re(x)),2,2))
+    
+    Lambda <-as.matrix(bdiag(bdiag(complex.block),diag(x=roots$real,nrow=length(roots$real))))
+  }else{
+    Lambda <-diag(x=roots$real,nrow=length(roots$real))
+  }
   
-  Lambda <-as.matrix(bdiag(bdiag(complex.block),diag(roots$real)))
   Lambda.inv<- solve(Lambda)
   
   Trans <- matrix(0,ncol=n*p,nrow=n*p)
@@ -105,13 +110,14 @@ gen_random_numbers <- function (r.roots=2, c.roots=0, ...) {
 #' Generate a n*q matrix where columns have length 1
 #'
 #'
-#' @param n Dimension of the output.
-#' @param q The rank of Sigma
+#' @param n The dimension of the process.
+#' @param q The rank of sigma matrix.
 #'
 #' @export
 modgen.b <- function (n, ...) {
   
   pars <- list(...)
+  print(pars)
   q <- pars[['q']]
 
   if (is.null(q)) q <- n
