@@ -44,7 +44,7 @@ modgen.a <- function (n, p, ...) {
   nb.c.roots <- pars[['complex.roots']]
   if (is.null(nb.c.roots)) nb.c.roots <- sample(seq(0, n*p, by=2), 1)
   else{
-    stopifnot(n>=nb.c.roots, nb.c.roots>=0,  nb.c.roots%%2==0)
+    stopifnot(n*p >= nb.c.roots, nb.c.roots >= 0,  nb.c.roots %% 2 == 0)
   }
 
   roots <- gen_random_numbers (n*p - nb.c.roots, nb.c.roots/2, ...)
@@ -54,7 +54,7 @@ modgen.a <- function (n, p, ...) {
   if(nb.c.roots>0){
     complex.block <- lapply(roots$complex, function(x)matrix(c(Re(x),-Im(x),Im(x),Re(x)),2,2))
 
-    Lambda <- as.matrix(bdiag(bdiag(complex.block),Lambda))
+    Lambda <- as.matrix(Matrix::bdiag(Matrix::bdiag(complex.block),Lambda))
   }
 
   Trans <- matrix(0,ncol=n*p,nrow=n*p)
