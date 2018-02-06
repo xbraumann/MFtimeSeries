@@ -1,3 +1,4 @@
+require(matrixcalc)
 
 #' Make AR paramter estimates stable
 #'
@@ -29,7 +30,7 @@
 #' }
 #'
 #' @export
-A.make.stable <- function (a.unstable, init.method='EV.scale', alpha=0.9999, tolerance=1e-4, iterations=50, ...){
+A.make.stable <- function (a.unstable, init.method='EV.ref1', alpha=0.9999, tolerance=1e-4, iterations=50, ...){
 
   if(A.stable(a.unstable)) return(list(a = a.unstable, init = a.unstable, lam=0,
                                    norm.step=0, steps=0))
@@ -39,17 +40,17 @@ A.make.stable <- function (a.unstable, init.method='EV.scale', alpha=0.9999, tol
   p <- ncol(a.unstable) / n
 
   #' start with a stable polynomial
-  init <- A.0 <- pars[['A.0']]
+  init <- pars[['init']]
+  if (is.null(init)) init <- initialization(a.unstable = a.unstable, init.method = init.method, ...)
 
-  if (is.null(A.0) | nrow(A.0) != ncol(A.0)) {
-    init <- A.0 <- initialization(a.unstable = a.unstable, init.method = init.method, ...)
-  }
+  A.0 <- A.companionform(init)
 
-  step <- j <-0
+  j <- 0
+  step <- matrix(1)
   lam <- norm.step <- rep(0, iterations)
 
-  #' as S is open, we have to specify when to stop by tol
-  while(j < iterations && norm(step, type="F") > tol){
+  #' as S is open, we have to specify when to stop by tolerance
+  while(j < iterations && norm(step, type="F") > tolerance){
 
     j <- j + 1
     #' compute the optimal P* and Q, (6.1.5-6)
@@ -85,7 +86,7 @@ A.make.stable <- function (a.unstable, init.method='EV.scale', alpha=0.9999, tol
   norm.step <- norm.step[1:j]
   lam       <- lam[1:j]
 
-  list(a = A.0[1:n,], init = init[1:n,], lam = lam,
+  list(a = A.0[1:n,], init = init, lam = lam,
        norm.step = norm.step, steps = j)
 
 }
@@ -114,7 +115,7 @@ psi.fn <- function (lambda, d, enumerator, alpha=0.999){
 
 
 #' @describeIn A.make.stable Initialization of the algorithm
-initialization <- function (a.unstable, init.method='EV.scale', ...){
+initialization <- function (a.unstable, init.method = 'EV.ref1', ...){
 
   if(A.stable(a.unstable)) return(a.unstable)
 
@@ -122,44 +123,147 @@ initialization <- function (a.unstable, init.method='EV.scale', ...){
   n <- nrow(a.unstable)
   p <- ncol(a.unstable)/n
 
-  eig     <- eigen(A.companionform(a.unstable))
-  eig.val <- eig$vector
-  eig.vec <- eig$values
+  if(init.method == 'EV.ref1') a.stable <- Blaschke.transformation(a.unstable)$a
+  else{
 
-  epsilon <- pars[["init.epsilon"]]
-  if(is.null(epsilon)) epsilon <- 1e-6
+    eig     <- eigen(A.companionform(a.unstable))
+    eig.val <- eig$values
+    eig.vec <- eig$vector
 
-   if(init.method=='EV.ref1') {
-     #OPEN
-  #   a.stable<-A.make.stable(a.unst)$a
-     a.stable<-a.unstable
-  }
+    epsilon <- pars[["init.epsilon"]]
+    if(is.null(epsilon)) epsilon <- 1e-6
 
-  if(init.method == 'EV.scale' || init.method == 'EV.ref2') {
+    if(init.method == 'EV.scale' || init.method == 'EV.ref2') {
 
-    not.stable <- abs(eig.val)>1
+      not.stable <- abs(eig.val)>1
 
-    if(init.method == 'EV.scale') eig.val[not.stable]  <- (1 - epsilon) * exp(1i * Arg( eig.val[not.stable] ))
-    else eig.val[not.stable]  <- 1 / Conj(eig.val[not.stable])
+      if(init.method == 'EV.scale') eig.val[not.stable]  <- (1 - epsilon) * exp(1i * Arg( eig.val[not.stable] ))
+      else eig.val[not.stable]  <- 1 / Conj(eig.val[not.stable])
 
-    Trans <- NULL
-    for(i in 1:p){
-      Trans <- rbind(Trans, eig$vector[1:n,] %*% diag( eig.val^(-i+1) ))
+      Trans <- NULL
+      for(i in 1:p){
+        Trans <- rbind(Trans, eig$vector[1:n,] %*% diag( eig.val^(-i+1) ))
+      }
+
+      a.stable <- Re(Trans %*% diag(eig.val) %*% solve(Trans))[1:n,]
     }
 
-    a.stable <- Re(Trans %*% diag(eig.val) %*% solve(Trans))[1:n,]
-  }
+    if(init.method == 'A.scale'){
+      mu <- min(abs( 1 / eig.val)) * (1-epsilon)
+      a.stable <- a.unstable
 
-  if(init.method == 'A.scale'){
-    mu <- min(abs( 1 / eig.val)) * (1-epsilon)
-    a.stable <- a.unstable
-
-    for(i in 1:p){
-      a.stable[, 1:n + (i-1)*n] <- a.stable[, 1:n + (i-1)*n] * mu^i
+      for(i in 1:p){ a.stable[, 1:n + (i-1)*n] <- a.stable[, 1:n + (i-1)*n] * mu^i  }
     }
   }
 
   a.stable
+}
+
+
+#' Stabilize estimator of A using the idea of Blaschke
+#'
+#' We are assuming that a(z) has different zeros.
+#'
+#' Details...
+#'
+#' @param a The AR system parameters.
+#' @param sigma The variance matrix of the innovations
+#'
+#' @return a The stable a polynomial
+#' @return sigma The stable a polynomial
+#'
+#'
+#' @export
+#'
+Blaschke.transformation<-function(a.unstable, sigma=NULL){
+
+  n <- nrow(a.unstable)
+  p <- ncol(a.unstable)/n
+  A <- A.companionform(a.unstable)
+
+  if(is.null(sigma)) sigma <- diag(n)
+
+  b <- t(chol(sigma))
+
+  a.bla <- solve(b) %*% cbind(diag(n), -a.unstable)
+
+
+  while(!A.stable(A)){
+
+    eig.val <- eigen(A)$values
+
+    z.0 <- 1/eig.val[1]
+    a.z0 <- a.bla[,1:n]
+
+    for(i in 1:p){ a.z0 <- a.z0 + z.0^i * a.bla[, 1:n + n*i] }
+    eig.vec <- solve( eigen(a.z0)$vectors )
+
+    K <- rbind(eig.vec[n,], cbind(0, diag(n-1)))
+    K <- t( orthonormalization_complex(t(K)) )
+
+    a.bla <- K %*% a.bla
+
+    # enumerator
+    enumerator <- c(a.bla[1,], rep(0,n)) -c(rep(0,n), a.bla[1,]) * Conj(z.0)
+    a.bla[1,] <- 0
+
+    #denumerator
+    for(j in 0:p){
+      for(k in (j+1):(p+1)){
+        a.bla[1, 1:n + n*j] <- a.bla[1, 1:n + n*j] + z.0^(k-j-1) * enumerator[1:n + n*k]
+      }
+    }
+
+
+    A.0.inv <- solve(a.bla[, 1:n])
+
+    A <- A.companionform(-A.0.inv %*% a.bla[, (n+1):ncol(a.bla)])
+  }
+
+  if( norm(Im(A[1:n,]), type="F") < 10^-10 ) A <- Re( A[1:n,] )
+  else print("A is complex")
+
+  b <- A.0.inv
+  sigma <- b %*% t(Conj(b))
+
+  if( norm(Im(sigma), type="F") < 10^-10 ) sigma <- Re(sigma)
+  else print("Sigma is complex")
+
+
+  list(a = A,sigma = sigma)
+
+}
+
+#' @describeIn A.make.stable
+orthonormalization_complex <- function (u = NULL, basis = TRUE, norm = TRUE){
+  if (is.null(u))
+    return(NULL)
+  if (!(is.matrix(u)))
+    u <- as.matrix(u)
+  p <- nrow(u)
+  n <- ncol(u)
+  if (prod(abs(La.svd(u)$d) > 1e-08) == 0)
+    stop("colinears vectors")
+  if (p < n) {
+    warning("too much vectors to orthogonalize.")
+    u <- as.matrix(u[, 1:p])
+    n <- p
+  }
+
+  v <- u
+  if (n > 1) {
+    for (i in 2:n) {
+      coef.proj <- c(crossprod(u[, i], v[, 1:(i - 1)]))/diag(crossprod(v[,1:(i - 1)],Conj(v[,1:(i - 1)])))
+      v[, i] <- u[, i] - matrix(v[, 1:(i - 1)], nrow = p) %*%
+        matrix(Conj(coef.proj), nrow = i - 1)
+    }
+  }
+
+  if (norm) {
+    coef.proj <- 1/sqrt(diag(crossprod(v,Conj(v))))
+    v <- t(t(v) * coef.proj)
+  }
+  return(v)
 }
 
 
@@ -168,7 +272,7 @@ initialization <- function (a.unstable, init.method='EV.scale', ...){
 #' @param Sigma A matrix of dimension \eqn{n*n}{n\times n}.
 #' @param q  q is the desired rank of sigma.
 #' @param epsilon Negative eigenvalues will be set to epsilon.
-proj.sigma<-function(sigma, q=NULL, epsilon=1e-7){
+proj.sigma <- function(sigma, q=NULL, epsilon=1e-7){
 
   n <- nrow(sigma)
 
