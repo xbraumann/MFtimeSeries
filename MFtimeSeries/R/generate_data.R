@@ -33,10 +33,8 @@ datagen <- function(T, a, b, N, nf, ...) {
 
     require(dse) ## we use ARMA, simulate
 
-    stopifnot(N>=1)
-    stopifnot(nrow(a)==nrow(b))
-    stopifnot(nf>=1)
-    stopifnot(qr(b)$rank==ncol(b))
+    stopifnot(N>=1, nrow(a)==nrow(b), nf>=1)
+    ## stopifnot(qr(b)$rank==ncol(b))
 
     pars <- list(...)
 
@@ -73,9 +71,8 @@ datagen <- function(T, a, b, N, nf, ...) {
     }
 
     ## RETURN:
-    ret <- list(full=Y.0,
-                mf=y,
-                mf2=y2)
+    ret <- list(high=Y.0,
+                mixed=y2)
   
     ret
     
