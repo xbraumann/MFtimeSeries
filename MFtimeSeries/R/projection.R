@@ -24,8 +24,7 @@ require(matrixcalc)
 #'   \item{a}{The nearest stable AR coefficients.}
 #'   \item{init}{...}
 #'   \item{lam}{...}
-#'   \item{nor}{...}
-#'   \item{nor.h}{...}
+#'   \item{norm.step}{...}
 #'   \item{steps}{The number of steps needed until a stable \eqn{A} has been reached.}
 #' }
 #'
@@ -164,10 +163,9 @@ initialization <- function (a.unstable, init.method = 'EV.ref1', ...){
 #'
 #' We are assuming that a(z) has different zeros.
 #'
-#' Details...
 #'
 #' @param a The AR system parameters.
-#' @param sigma The variance matrix of the innovations
+#' @param sigma The variance matrix of the innovations.
 #'
 #' @return a The stable a polynomial
 #' @return sigma The stable a polynomial
@@ -267,9 +265,9 @@ orthonormalization_complex <- function (u = NULL, basis = TRUE, norm = TRUE){
 }
 
 
-#' Projection of a symmetric matrix on the space of positive semidefinte matrices.
+#' Projection of a symmetric matrix on the space of positive semidefinite matrices.
 #'
-#' @param Sigma A matrix of dimension \eqn{n*n}{n\times n}.
+#' @param sigma A matrix of dimension \eqn{n*n}{n\times n}.
 #' @param q  q is the desired rank of sigma.
 #' @param epsilon Negative eigenvalues will be set to epsilon.
 proj.sigma <- function(sigma, q=NULL, epsilon=1e-7){
