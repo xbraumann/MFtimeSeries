@@ -14,3 +14,7 @@ A.stable <- function(A) {
   if(nrow(A)!=ncol(A)) A <- A.companionform(A)
   return(max(abs(eigen(A, only.values=TRUE)$values)) < 1)
 }
+
+calc.acf <- function(data, lags=0){
+  stats::acf(data, na.action=na.pass, type="covariance", lag.max=lags, demean=TRUE, plot=FALSE)$acf
+}
