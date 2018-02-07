@@ -1,10 +1,10 @@
 
 ## Mixed-frequency estimators
 
-## XYW
+## XYW - Extended Yule Walker
 
 EYW <- function( ... ) {
 
 
 
-    }
+}
