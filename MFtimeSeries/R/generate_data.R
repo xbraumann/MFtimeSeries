@@ -31,7 +31,7 @@
 #'
 datagen <- function(T, a, b, N, nf, ...) {
 
-    require(dse) ## we use ARMA, simulate
+    require(dse, quietly = TRUE) ## we use ARMA, simulate
     n <- nrow(a)
     stopifnot(N>=1, n==nrow(b), nf>=1, n>nf)
     ## stopifnot(qr(b)$rank==ncol(b))

@@ -23,7 +23,7 @@ detect_fast_slow <- function (x) {
 
   tmp <- apply(x, 2, function(x) {any(is.na(x)) })
 
-  grid <- which(apply(x, 1, function(x) {any(is.na(x)) }))
+  grid <- which(apply(x[1:100,], 1, function(x) {any(is.na(x)) }))
   N <- grid[2]-grid[1]
 
   list(is.fast = !tmp,
@@ -32,42 +32,19 @@ detect_fast_slow <- function (x) {
 }
 
 
-#open
-Yplus <- function (data, k) {
+Yminus <- function (data, k) {
 
-  d <- dim(data)[2]
-  T <- dim(data)[1]
+  d <- ncol(data)
+  T <- nrow(data)
+
   Y <- NULL
-  if(k>0){
-    for (i in 1:k) {
-
-      zeros <- matrix(0, nrow=d, ncol=i)
-      sel <- i:T
-      ith.row <- cbind(t(data)[, sel, drop=FALSE], zeros)
-
-      Y <- rbind(Y, ith.row)
-    }
-  }
-  Y
-}
-
-#open
-Yminus <- function (data, k, offset=0) {
-
-  d <- dim(data)[2]
-  T <- dim(data)[1]
-  Y <- NULL
-  if(k>0){
-    for (i in 1:k) {
+  for (i in 0:k) {
       # unavailable values are set to 0
-      zerocols <- (offset-i+1<=0)*abs(offset-i)
-      zeros <- matrix(0, nrow=d, ncol=zerocols)
-      sel <- (offset-i+1):(T-i+1)
-      sel <- sel[sel>0]
-      ith.row <- cbind(zeros, t(data)[, sel, drop=FALSE])
+      ith.col <- rbind(matrix(0, ncol=d,  nrow=i),
+                       data,
+                       matrix(0, ncol=d,  nrow=k-i))
 
-      Y <- rbind(Y, ith.row)
-    }
+      Y <- cbind(Y, ith.col)
   }
   Y
 }

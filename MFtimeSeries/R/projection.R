@@ -1,5 +1,3 @@
-require(matrixcalc)
-
 #' Make AR paramter estimates stable
 #'
 #' ARp - Nearest stable system using succesive convex approximation
@@ -30,6 +28,8 @@ require(matrixcalc)
 #'
 #' @export
 A.make.stable <- function (a.unstable, init.method='EV.ref1', alpha=0.9999, tolerance=1e-4, iterations=50, ...){
+
+  require(matrixcalc, quietly = TRUE)
 
   if(A.stable(a.unstable)) return(list(a = a.unstable, init = a.unstable, lam=0,
                                    norm.step=0, steps=0))
@@ -278,7 +278,7 @@ proj.sigma <- function(sigma, q=NULL, epsilon=1e-7){
 
   eig <- eigen(sigma)
   eig.val <- eig$values[1:q]
-  eig.val[abs(eig.val) < epsilon]  <- epsilon
+  eig.val[eig.val < epsilon]  <- epsilon
 
   eig.vec <- matrix(eig$vectors[,1:q], nrow=n)
 

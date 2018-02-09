@@ -10,13 +10,13 @@
 #' @return sigma.0 The non-projected estimate of sigma
 #'
 #' @export
-sigma.hat <- function (data, a, q=NULL, ...) {
+sigma.hat <- function (dat.mf, a, q=NULL, ...) {
   n <- nrow(a)
   if(is.null(q)) q <- n
 
   stopifnot(q>0, n>=q)
 
-  sigma.0 <- est.sigma(data,a)
+  sigma.0 <- est.sigma(dat.mf,a)
 
   sigma <- proj.sigma(sigma.0, q)
 
