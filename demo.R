@@ -1,18 +1,15 @@
 library(devtools)
 load_all(pkg="../MFtimeSeries")
 
-n <- 2
-p <- 2
-
 set.seed(1)
 
-model <- modgen(n,p)
+model <- modgen(n=2,p=2)
 a <- model$a
 sigma <- model$sigma
 
 
 
-Y <- datagen(25, a, t(chol(sigma)), 2, 1)
+Y <- datagen(T=25, a=a, b=t(chol(sigma)), N=2, nf=1)
 
 str(Y)
 
