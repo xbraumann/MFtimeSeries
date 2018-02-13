@@ -1,7 +1,20 @@
-
+#'
+#' Wrapper function for the estimation of stable AR and positive semi-definite innovation matrix
+#'
+#' @param dat.mf T*n data matrix of mf-data
+#' @param p Order of the AR polynomial
+#' @param method The method for the initialization
+#' @param k A predefined k
+#' @param upper The upper bound for the k-search
+#'
+#' @return
+#'
+#' @export
 
 estimate.AR <- function(dat.mf, p, method="IVL", ...){
   args <- list(...)
+
+  stopifnot(p>0, is.matrix(dat.mf))
 
   if(method == 'XYW'){
     k <- args[['k']]
@@ -14,12 +27,12 @@ estimate.AR <- function(dat.mf, p, method="IVL", ...){
     a.hat.0 <- IVL(dat.mf, p=p, k=k, upper=upper)$a.hat
     }
 
-  a.hat <- A.make.stable(a.hat.0)$a
+  a.hat <- A.make.stable(a.hat.0, ...)$a
 
-  q <- args[['q']]
-  sigma.hat <- sigma.hat(dat.mf=dat.mf, a=a.hat, q=q)$sigma
+  sigma.help <- sigma.hat(dat.mf=dat.mf, a=a.hat, ...)
 
-  list(a=a.hat, sigma=sigma.hat)
+
+  list(a=a.hat, a.hat.0=a.hat.0, sigma=sigma.help$sigma, sigma.0=sigma.help$sigma.0)
 
 }
 
@@ -41,10 +54,11 @@ XYW <- function( ... ) {
 #'
 #' @param dat.mf T*n data matrix of mf-data
 #' @param p Order of the AR polynomial
-#' @param k
-#' @param upper
+#' @param k A predefined k
+#' @param upper The upper bound for the k-search
 #'
-#' @return
+#' @return a.hat The estimator of the AR polynomial
+#' @return k The estimated lag
 #'
 #' @export
 IVL <- function(dat.mf, p, k=NULL, upper=NULL) {
@@ -56,7 +70,7 @@ IVL <- function(dat.mf, p, k=NULL, upper=NULL) {
   ns <- n-nf
   N <- detection$N
 
-  stopifnot(n>1, n>nf, p>1, k >= n*p, N>1)
+  stopifnot(n>1, n>nf, p>0, k >= n*p, N>1)
 
   if(is.null(k)) k <- AIC.IVL(dat.mf=dat.mf, p=p, n=n, nf=nf, N=N, upper=upper)$k
 
@@ -86,16 +100,20 @@ IVL <- function(dat.mf, p, k=NULL, upper=NULL) {
 
 AIC.IVL <- function(dat.mf, p, n, nf, N, upper=NULL){
 
-  ns<-n-nf
+  ns <- n-nf
 
-  AIC <- NULL
+
   dat.f <- matrix( dat.mf[,1:nf], ncol=nf)
   dat.s <- matrix( na.omit(dat.mf[,nf + 1:ns]), ncol=ns)
 
   if(is.null(upper)) upper <- log(nrow(dat.s))^1.5
   k.min <- ceiling(n*p / nf)
 
+  stopifnot(upper >= k.min)
+
   x.t.hat <- Yminus(dat.mf, p-1)[1:nrow(dat.mf),]
+
+  AIC <- NULL
 
   for (k in k.min:upper){
     Y.minus   <-  Yminus (dat.f, k)
@@ -113,7 +131,7 @@ AIC.IVL <- function(dat.mf, p, n, nf, N, upper=NULL){
     AIC <- c(AIC, AIC.help)
 
   }
-  k <- which(min(AIC)==AIC) + k.min - 1
+  k <- which(min(AIC) == AIC) + k.min - 1
 
   list(k=k, AIC=AIC)
 }

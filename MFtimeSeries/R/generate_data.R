@@ -44,7 +44,6 @@ datagen <- function(T, a, b, N, nf, ...) {
                                         # burn-in
     T1 <- T+T.start
 
-    n <- nrow(a)
     q <- ncol(b)  ## or qr(b)$rank
 
     ## create ARMA object for the simulate function
