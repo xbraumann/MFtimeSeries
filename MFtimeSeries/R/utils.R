@@ -22,8 +22,8 @@ calc.acf <- function(data, lags=0){
 detect_fast_slow <- function (x) {
 
   tmp <- apply(x, 2, function(x) {any(is.na(x)) })
-
-  grid <- which(apply(x[1:100,], 1, function(x) {any(is.na(x)) }))
+  sel <- min(nrow(x),500)
+  grid <- which(apply(x[1:sel,], 1, function(x) {all(!is.na(x)) }))
   N <- grid[2]-grid[1]
 
   list(is.fast = !tmp,
