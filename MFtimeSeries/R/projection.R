@@ -39,7 +39,7 @@ A.make.stable <- function (a.unstable, ...){
   p <- ncol(a.unstable) / n
 
   init.method <- pars[['init.method']]
-  if (is.null(init.method)) init.method <- EV.ref1
+  if (is.null(init.method)) init.method <- "EV.ref1"
 
   iterations <- pars[['iterations']]
   if (is.null(iterations)) iterations <- 50
