@@ -18,3 +18,34 @@ A.stable <- function(A) {
 calc.acf <- function(data, lags=0){
   stats::acf(data, na.action=na.pass, type="covariance", lag.max=lags, demean=TRUE, plot=FALSE)$acf
 }
+
+detect_fast_slow <- function (x) {
+
+  tmp <- apply(x, 2, function(x) {any(is.na(x)) })
+  sel <- min(nrow(x),500)
+  grid <- which(apply(x[1:sel,], 1, function(x) {all(!is.na(x)) }))
+  N <- grid[2]-grid[1]
+
+  list(is.fast = !tmp,
+       is.slow = tmp,
+       N = N)
+}
+
+
+Yminus <- function (data, k) {
+
+  d <- ncol(data)
+  T <- nrow(data)
+
+  Y <- NULL
+  for (i in 0:k) {
+      # unavailable values are set to 0
+      ith.col <- rbind(matrix(0, ncol=d,  nrow=i),
+                       data,
+                       matrix(0, ncol=d,  nrow=k-i))
+
+      Y <- cbind(Y, ith.col)
+  }
+  Y
+}
+

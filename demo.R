@@ -1,24 +1,25 @@
 library(devtools)
 load_all(pkg="../MFtimeSeries")
 
-n <- 2
+set.seed(2)
+
+n <- 3
 p <- 2
-
-set.seed(1)
-
-model <- modgen(n,p)
+model <- modgen(n=n,p=p)
 a <- model$a
+b <- model$b
 sigma <- model$sigma
 
 
 
-Y <- datagen(25, a, t(chol(sigma)), 2, 1)
+Y <- datagen(T=25000, a=a, b=b, N=2, nf=2)
+dat.mf <- Y$mixed
 
-str(Y)
+res <- estimate.AR(dat.mf, p)
+res$a
+a
+a-res$a
 
-head(Y$full)
-
-head(Y$mf2)
-
-acf(Y$full)
-pacf(Y$full)
+res$sigma
+sigma
+sigma-res$sigma
