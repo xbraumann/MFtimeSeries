@@ -1,4 +1,56 @@
 
+#' state space representation of varp system
+#'
+#' @param R_ii The diagonal element of the measurement covariance matrix \eqn{R}
+#' @param scheme Weights for flow data
+#' 
+#' @rdname systemparameters
+#' @export
+ar.to.ss <- function (a, b, R_ii=NULL, scheme=NULL, nf=NULL) {
+ 
+    n <- dim(a)[1]
+    p <- floor(dim(a)[2]/n)
+    q <- ncol(b)
+
+    if (is.null(scheme)) m <- p
+    else m <- max(p, length(scheme))
+    
+    if (is.null(R_ii)) R <- diag(1e-10,n)
+    else R <- diag(R_ii, n)
+    
+    Sigma <- b%*%t(b)
+
+    S <- matrix(0, n*m, n*m)
+    S[1:n, 1:n] <- Sigma
+
+    if (is.null(scheme)) {
+        oH <- matrix(rep(diag(n)*0, p-1), nrow=n)
+        H <- cbind(diag(n), oH)
+    } else {
+
+        H <- cbind(diag(1, nf), matrix(0, nf, m*n-nf))
+        H <- rbind(H, kronecker(matrix(scheme, nrow=1), cbind(matrix(0,n-nf, nf), diag(1,n-nf))))
+    }
+
+    A <- A.companionform(cbind(a, matrix(0, n, (m-p)*n)))
+    
+    P1 <- matrix(solve(diag(n^2*m^2)-kronecker(A, A))%*%matrix(S), ncol=n*m)
+    mu1 <- as.vector(rep(0, n*m))
+
+    zeros <- matrix(rep(0,n*(p-1)*q), ncol=q)
+    
+    list(A=A,
+         B=rbind(b, zeros),
+         C=H,
+         a1=mu1,
+         V1=P1,
+         Q=S,
+         R=R)
+   
+}
+
+
+
 
 A.companionform <- function(a) {
   stopifnot(is.matrix(a))
