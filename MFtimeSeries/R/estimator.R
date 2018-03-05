@@ -76,7 +76,7 @@ IVL <- function(dat.mf, p, k=NULL, upper=NULL) {
 
   stopifnot(n>1, n>nf, p>0, k>=n*p, N>1)
 
-  if(is.null(k)) k <- AIC.IVL(dat.mf=dat.mf, p=p, n=n, nf=nf, N=N, grid=grid, upper=upper)$k
+  if(is.null(k)) k <- AIC_IVL(dat.mf=dat.mf, p=p, n=n, nf=nf, N=N, grid=grid, upper=upper)$k
 
   dat.f <- dat.mf[,1:nf, drop=FALSE]
   dat.s <- na.omit(dat.mf[,nf + 1:ns, drop=FALSE])
@@ -107,7 +107,7 @@ IVL <- function(dat.mf, p, k=NULL, upper=NULL) {
 
 
 #' @describeIn IVL estimation of the k parameter
-AIC.IVL <- function(dat.mf, p, n, nf, N, grid, upper=NULL){
+AIC_IVL <- function(dat.mf, p, n, nf, N, grid, upper=NULL){
 
   ns <- n-nf
 
