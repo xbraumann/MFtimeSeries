@@ -47,7 +47,8 @@ estimate.AR <- function(dat.mf, p, method="IVL", ...){
   ## AB: 2018-03-02
   ## Note: EM algorithm estimates both, a.hat and sigma
   if (method == 'EM') {
-      
+      res.em <- EM (dat.mf, p, n.init=5, iter.max=100, tol=1e-4)
+      a.hat.0 <- res.em$EM$a.hat
   }
 
   a.hat <- A.make.stable(a.hat.0, ...)$a
@@ -237,8 +238,9 @@ EM <- function (dat.mf, p, n.init, iter.max, tol=1e-4) {
 
     reml <- list()
     ll.names <-  NULL
-    
-    loglik <- emtime <- rep(NA, 1+k+length(thetas))
+
+    ## + length(thetas)
+    loglik <- emtime <- rep(NA, 1+n.init)
     
     if (n.init>0) {
         for (j in 1:n.init) {
@@ -266,7 +268,7 @@ EM <- function (dat.mf, p, n.init, iter.max, tol=1e-4) {
                 loglik[j] <- reml[[j]]$loglik
             }
         }
-        ll.names <- paste('r', 1:k, sep='')
+        ll.names <- paste('r', 1:n.init, sep='')
     }
     
     ##if (!is.null(thetas) && length(thetas)>0) {
@@ -347,7 +349,7 @@ EM.algorithm <- function (y, a, b, nf, N, iter.max, tol) {
   
     for (k in 1:iter.max) {
   
-        res <- mfvar::Estep0002(y, A.companionform(A), B, A, b%*%t(b), t(b), matrix(0,1, n*p), m.ss$V1, N, nf)
+        res <- Estep0002(y, A.companionform(A), B, A, b%*%t(b), t(b), matrix(0,1, n*p), m.ss$V1, N, nf)
 
         hist[dim(hist)[1],1] <- res$loglik
         hist[dim(hist)[1],2] <- res$loglik<logLik2
@@ -371,7 +373,7 @@ EM.algorithm <- function (y, a, b, nf, N, iter.max, tol) {
             print(abs(eigen(A.companionform(A))$values))
             
             print("10e-1")
-            stab <- A.make.stable.convex.approx(a.unst=A, count=100, init.method='ref', makestable.tol=1e-1)
+            stab <- A.make.stable(a.unst=A,  makestable.tol=1e-1)
             A <- stab$a
             print("eigenvalues of stabilized A")
             print(abs(eigen(A.companionform(A))$values))

@@ -18,11 +18,24 @@ dat.mf <- Y$mixed
 ## IVL
 res <- estimate.AR(dat.mf, p)
 res$a
+res$a-model$a
+norm(res$a-model$a, type="F")
 
 ## XYW
 res <- estimate.AR(dat.mf, p, "XYW", k=n*p)
 res$a
+res$a-model$a
+norm(res$a-model$a, type="F")
 
+## EM
+res <- estimate.AR(dat.mf, p, "EM")
+res$a
+res$a-model$a
+norm(res$a-model$a, type="F")
+
+
+
+res$a
 a
 a-res$a
 

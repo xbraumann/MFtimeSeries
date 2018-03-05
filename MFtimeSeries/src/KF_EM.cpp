@@ -232,13 +232,13 @@ Rcpp::List kfilter (const arma::mat Y,
 
 
 
-*/
+
 
 //' The Expectation step in the EM Algorithm
 //' 
 //' Compute the sufficient statistics in the EM Algorithm for state space models. Ignore the starting values.
 //' 
-//' @rdname EMalg
+//'
 //' 
 // [[Rcpp::export]]
 Rcpp::List Estep0002 (const arma::mat Y,
@@ -340,7 +340,7 @@ Rcpp::List Estep0002 (const arma::mat Y,
 //' 
 //' Compute the sufficient statistics in the EM Algorithm for state space models. Including starting values x1 with mean mu1 and covariance V1. See Shumway and Stoffer 1982.
 //' 
-//' @rdname EMalg
+//' 
 //'
 // [[Rcpp::export]]
 Rcpp::List Estep0003 (const arma::mat Y,
