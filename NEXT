@@ -1,0 +1,13 @@
+07-03-2018
+
+1. EM Algorithm:
+
+   a. Init values mitgeben als Liste (init= statt n.init=)
+   b. EM.init: helper function, die einem Startwerte generiert
+
+2. Testskripts schreiben:
+
+   a. Konsistenz
+   b. Auf Crashes bei 'reasonable' sample sizes checken
+
+
