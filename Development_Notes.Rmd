@@ -1,0 +1,30 @@
+---
+title: "Developing Notes"
+author: "Alexander Braumann"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+  theme: cosmo
+code_folding: hide
+---
+  
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, eval = TRUE)
+library(devtools)
+load_all('./MFtimeSeries')
+```
+
+This document summarises developing issues with the package.
+
+
+# Testing 
+
+- Using the package `testthat`
+- Files are in the folder `./test/testthat`
+- Testfiles filenames need to begin with `test_`
+- `devtools::test('.')` runs all the test files
+
+```{r}
+devtools::test('./MFtimeSeries')
+```
+
