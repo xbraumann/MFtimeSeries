@@ -1,5 +1,6 @@
 # MFtimeSeries: Mixed-Frequency Time Series
 
+!BETA Release!
 This is an R-package implementation based on the theory of a couple of research papers which deals with the problem of analyzing autoregressive systems in the case of mixed-frequency observations. For more details about the theory, see the References section below.
 
 Have fun,
@@ -33,6 +34,9 @@ Furthermore, a stabilization algorithm for the AR parameters as well as for the 
 ## Planned updates/extensions:
 
 This is a work in progress.  Planned extensions include:
+* **Initial Version**
+   * Stabilization and Testing.
+   
 * **Flow Case**
    * Extension of the algorithms to the mixed-frequency flow case.
    
@@ -40,5 +44,5 @@ This is a work in progress.  Planned extensions include:
    * Extension of the algorithms to the ARMA case. 
 
 ## Major updates and releases:
-* 03/20/2018: Initial release, version 1.0.
+* 05/01/2018: Beta release
 

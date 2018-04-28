@@ -45,10 +45,10 @@ A.make.stable <- function (a.unstable, ...){
   if (is.null(iterations)) iterations <- 50
 
   tolerance <- pars[['tolerance']]
-  if (is.null(tolerance)) tolerance <- 1e-4
+  if (is.null(tolerance)) tolerance <- 1e-3
 
   alpha <- pars[['alpha']]
-  if (is.null(alpha)) alpha <- 0.9999
+  if (is.null(alpha)) alpha <- 0.999
 
   init <- pars[['init']]
   if (is.null(init)) init <- initialization(a.unstable = a.unstable, init.method = init.method, ...)
