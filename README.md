@@ -1,6 +1,7 @@
 # MFtimeSeries: Mixed-Frequency Time Series
 
 !BETA Release!
+
 This is an R-package implementation based on the theory of a couple of research papers which deals with the problem of analyzing autoregressive systems in the case of mixed-frequency observations. For more details about the theory, see the References section below.
 
 Have fun,
